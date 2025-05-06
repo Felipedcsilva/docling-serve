@@ -1,0 +1,241 @@
+[project]
+name = "docling-serve"
+version = "0.10.1"  # DO NOT EDIT, updated automatically
+description = "Running Docling as a service"
+license = {text = "MIT"}
+authors = [
+    {name="Michele Dolfi", email="dol@zurich.ibm.com"},
+    {name="Guillaume Moutier", email="gmoutier@redhat.com"},
+    {name="Anil Vishnoi", email="avishnoi@redhat.com"},
+    {name="Panos Vagenas", email="pva@zurich.ibm.com"},
+    {name="Panos Vagenas", email="pva@zurich.ibm.com"},
+    {name="Christoph Auer", email="cau@zurich.ibm.com"},
+    {name="Peter Staar", email="taa@zurich.ibm.com"},
+]
+maintainers = [
+    {name="Michele Dolfi", email="dol@zurich.ibm.com"},
+    {name="Anil Vishnoi", email="avishnoi@redhat.com"},
+    {name="Panos Vagenas", email="pva@zurich.ibm.com"},
+    {name="Christoph Auer", email="cau@zurich.ibm.com"},
+    {name="Peter Staar", email="taa@zurich.ibm.com"},
+]
+readme = "README.md"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    # "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Typing :: Typed",
+    "Programming Language :: Python :: 3"
+]
+requires-python = ">=3.10"
+dependencies = [
+    "docling[vlm]~=2.28",
+    "mlx-vlm~=0.1.12; sys_platform == 'darwin' and platform_machine == 'arm64'",
+    "fastapi[standard]~=0.115",
+    "httpx~=0.28",
+    "kfp[kubernetes]>=2.10.0",
+    "pydantic~=2.10",
+    "pydantic-settings~=2.4",
+    "python-multipart>=0.0.14,<0.1.0",
+    "typer~=0.12",
+    "uvicorn[standard]>=0.29.0,<1.0.0",
+    "websockets~=14.0",
+]
+
+[project.optional-dependencies]
+ui = [
+    "gradio~=5.9",
+    "pydantic<2.11.0",  # fix compatibility between gradio and new pydantic 2.11
+]
+tesserocr = [
+    "tesserocr~=2.7"
+]
+rapidocr = [
+    "rapidocr-onnxruntime~=1.4; python_version<'3.13'",
+    "onnxruntime~=1.7",
+]
+cpu = [
+  "torch>=2.6.0",
+  "torchvision>=0.21.0",
+]
+cu124 = [
+  "torch>=2.6.0",
+  "torchvision>=0.21.0",
+]
+flash-attn = [
+  "flash-attn~=2.7.0; sys_platform == 'linux' and platform_machine == 'x86_64'"
+]
+
+[dependency-groups]
+dev = [
+    "asgi-lifespan~=2.0",
+    "mypy~=1.11",
+    "pre-commit-uv~=4.1",
+    "pytest~=8.3",
+    "pytest-asyncio~=0.24",
+    "pytest-check~=2.4",
+    "python-semantic-release~=7.32",
+    "ruff>=0.9.6",
+]
+
+[tool.uv]
+package = true
+conflicts = [
+  [
+    { extra = "cpu" },
+    { extra = "cu124" },
+  ],
+  [
+    { extra = "cpu" },
+    { extra = "flash-attn" },
+  ],]
+environments = ["sys_platform != 'darwin' or platform_machine != 'x86_64'"]
+override-dependencies = [
+  "urllib3~=2.0"
+]
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cu124", extra = "cu124" },
+]
+torchvision = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cu124", extra = "cu124" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.setuptools.packages.find]
+include = ["docling_serve*"]
+namespaces = true
+
+[project.scripts]
+docling-serve = "docling_serve.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/docling-project/docling-serve"
+# Documentation = "https://ds4sd.github.io/docling"
+Repository = "https://github.com/docling-project/docling-serve"
+Issues = "https://github.com/docling-project/docling-serve/issues"
+Changelog = "https://github.com/docling-project/docling-serve/blob/main/CHANGELOG.md"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+respect-gitignore = true
+
+# extend-exclude = [
+#     "tests",
+# ]
+
+[tool.ruff.format]
+skip-magic-trailing-comma = false
+
+[tool.ruff.lint]
+select = [
+    # "B",  # flake8-bugbear
+    "C",  # flake8-comprehensions
+    "C9",  # mccabe
+    # "D",  # flake8-docstrings
+    "E",  # pycodestyle errors (default)
+    "F",  # pyflakes (default)
+    "I",  # isort
+    "PD", # pandas-vet
+    "PIE", # pie
+    # "PTH", # pathlib
+    "Q",  # flake8-quotes
+    # "RET", # return
+    "RUF", # Enable all ruff-specific checks
+    # "SIM", # simplify
+    "S307", # eval
+    # "T20",  # (disallow print statements) keep debugging statements out of the codebase
+    "W",  # pycodestyle warnings
+    "ASYNC", # async
+    "UP", # pyupgrade
+]
+
+ignore = [
+    "E501",  # Line too long, handled by ruff formatter
+    "D107", # "Missing docstring in __init__",
+    "F811", # "redefinition of the same function"
+    "PL", # Pylint
+    "RUF012", # Mutable Class Attributes
+    "UP007", # Option and Union
+]
+
+#extend-select = []
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402", "F401"]
+"tests/*.py" = ["ASYNC"] # Disable ASYNC check for tests
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.lint.isort.sections]
+"docling" = ["docling", "docling_core"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+section-order = [
+  "future",
+  "standard-library",
+  "third-party",
+  "docling",
+  "first-party",
+  "local-folder",
+]
+
+[tool.mypy]
+pretty = true
+# strict = true
+no_implicit_optional = true
+plugins = "pydantic.mypy"
+python_version = "3.10"
+
+[[tool.mypy.overrides]]
+module = [
+    "easyocr.*",
+    "tesserocr.*",
+    "rapidocr_onnxruntime.*",
+    "requests.*",
+    "kfp.*",
+    "kfp_server_api.*",
+    "mlx_vlm.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+minversion = "8.2"
+testpaths = [
+    "tests",
+]
+addopts = "-rA --color=yes --tb=short --maxfail=5"
+markers = [
+"asyncio",
+]
+
+[tool.semantic_release]
+# for default values check:
+# https://github.com/python-semantic-release/python-semantic-release/blob/v7.32.2/semantic_release/defaults.cfg
+
+version_source = "tag_only"
+branch = "main"
+
+# configure types which should trigger minor and patch version bumps respectively
+# (note that they must be a subset of the configured allowed types):
+parser_angular_allowed_types = "build,chore,ci,docs,feat,fix,perf,style,refactor,test"
+parser_angular_minor_types = "feat"
+parser_angular_patch_types = "fix,perf"

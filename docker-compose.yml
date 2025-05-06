@@ -1,0 +1,30 @@
+services:
+  docling-server:
+    container_name: docling-dev
+    image: quay.io/docling-project/docling-serve-cpu
+    environment:
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
+      - DOCLING_SERVE_ENABLE_UI=true
+    ports:
+      # A porta padrão correta é 5001, não 80
+      - "8000:5001"
+      # Mapeamento direto para teste
+      - "5001:5001"
+    networks:
+      - docling_network
+      - backend
+    restart: unless-stopped
+    # volumes:
+    #   # Cache de modelos (opcional)
+    #   - ./model_cache:/opt/app-root/src/.cache/docling/models
+
+networks:
+  docling_network:
+    driver: bridge
+  backend:
+    external: true
+
+# Define volumes nomeados se precisar de persistência além dos mapeamentos bind
+# volumes:
+#   model_cache: 

@@ -1,0 +1,37 @@
+services:
+  docling:
+    container_name: docling-dev
+    # Altera a imagem para a que inclui chunking
+    image: docling-chunking:latest
+    build:
+      context: .
+      # Aponta para o Dockerfile correto dentro da pasta docling
+      dockerfile: docling/Dockerfile-docling-minimal
+    environment:
+      - FLASK_DEBUG=true # Ativa o modo debug do Flask para desenvolvimento
+      - PYTHONUNBUFFERED=1 # Garante que logs apareçam imediatamente
+      - PORT=80 # Define a porta que o Flask vai escutar dentro do container
+      # Adicione outras variáveis de ambiente se necessário
+      # - HF_HOME=/app/models # Exemplo: Onde transformers/HuggingFace podem procurar modelos
+    volumes:
+      # Mapeia a pasta local completa para /app no container, permitindo live reload do código
+      - "./:/app"
+      # Mapeia especificamente a pasta de modelos local para dentro do container
+      - "./docling/models:/app/models"
+      # Garante que a pasta .venv local NÃO seja mapeada para o container
+      - /app/.venv 
+    ports:
+      # Mapeia a porta 80 do host para a porta 80 do container
+      - "80:80"
+    networks:
+      - docling_network
+    restart: unless-stopped
+
+# ... (Restante da configuração de networks, volumes globais, etc., se houver)
+networks:
+  docling_network:
+    driver: bridge
+
+# Define volumes nomeados se precisar de persistência além dos mapeamentos bind
+# volumes:
+#   model_cache: 
