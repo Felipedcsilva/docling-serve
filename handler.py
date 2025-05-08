@@ -5,6 +5,7 @@ import threading
 import time
 import os
 import base64
+import json
 
 # --- Configuração do Servidor Docling ---
 DOCLING_HOST = "http://localhost:5001"
@@ -57,6 +58,7 @@ def process_document_conversion(job):
 
     file_content_base64 = job_input.get('file_content_base64')
     filename = job_input.get('filename', 'uploaded_file') # Nome de arquivo padrão
+    options = job_input.get('options', {}) # Obter 'options', default para {} se não fornecido
 
     if not file_content_base64:
         return {"error": "Conteúdo do arquivo (file_content_base64) não fornecido."}
@@ -70,12 +72,22 @@ def process_document_conversion(job):
         return {"error": "Conteúdo do arquivo decodificado está vazio."}
 
     # 1. Enviar arquivo para conversão
-    print(f"Enviando arquivo '{filename}' para conversão...")
-    files = {'upload_file': (filename, file_content_bytes)} # Assumindo que o nome do campo é 'upload_file'
-                                                         # O nome do arquivo no tuple é importante para multipart
+    print(f"Enviando arquivo '{filename}' para conversão com opções: {options}")
+    files_payload = {'upload_file': (filename, file_content_bytes)}
+    
+    data_payload = {}
+    if options:
+        try:
+            # O docling-serve /v1alpha/convert/file/async provavelmente espera
+            # as opções como uma string JSON em um campo de formulário.
+            # Nomeando o campo 'options_str' por enquanto.
+            data_payload['options_str'] = json.dumps(options)
+        except TypeError as e:
+            return {"error": f"Erro ao serializar opções para JSON: {e}", "options_fornecidas": options}
 
     try:
-        response = requests.post(CONVERT_ENDPOINT, files=files, timeout=30)
+        # Passar 'options_str' no parâmetro 'data' da requisição multipart
+        response = requests.post(CONVERT_ENDPOINT, files=files_payload, data=data_payload, timeout=30)
         response.raise_for_status() # Levanta exceção para códigos de erro HTTP
         convert_data = response.json()
         task_id = convert_data.get('task_id')
