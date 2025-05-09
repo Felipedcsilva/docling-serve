@@ -135,17 +135,14 @@ def process_document_conversion(job):
         if 'ocr' in options:
             data_payload['ocr'] = str(options['ocr']).lower()  # "true" ou "false" em string
 
-        # Removendo options_str que pode causar conflito
-        # if options:
-        #     try:
-        #         data_payload['options_str'] = json.dumps(options)
-        #         
-        #         print(f"Payload de dados preparado: {data_payload}")
-        #     except TypeError as e:
-        #         print(f"Erro ao serializar opções JSON: {e}")
-        #         return {"error": f"Erro ao serializar opções para JSON: {e}", "options_fornecidas": options}
-
-        print(f"Payload de dados preparado: {data_payload}")
+        # Restaurando options_str que foi removido anteriormente
+        if options:
+            try:
+                data_payload['options_str'] = json.dumps(options)
+                print(f"Payload de dados preparado: {data_payload}")
+            except TypeError as e:
+                print(f"Erro ao serializar opções JSON: {e}")
+                return {"error": f"Erro ao serializar opções para JSON: {e}", "options_fornecidas": options}
 
         try:
             headers = {
