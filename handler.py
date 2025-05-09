@@ -135,7 +135,19 @@ def process_document_conversion(job):
         if 'ocr' in options:
             data_payload['ocr'] = str(options['ocr']).lower()  # "true" ou "false" em string
 
-        # Restaurando options_str que foi removido anteriormente
+        # Opções avançadas para hybrid chunking
+        if 'chunking' in options:
+            chunking_opts = options['chunking']
+            if 'strategy' in chunking_opts:
+                data_payload['chunking_strategy'] = chunking_opts['strategy']
+            if 'tokenizer' in chunking_opts:
+                data_payload['chunking_tokenizer'] = chunking_opts['tokenizer']
+            if 'max_tokens' in chunking_opts:
+                data_payload['chunking_max_tokens'] = str(chunking_opts['max_tokens'])
+            if 'merge_peers' in chunking_opts:
+                data_payload['chunking_merge_peers'] = str(chunking_opts['merge_peers']).lower()
+
+        # Restaurando options_str para compatibilidade
         if options:
             try:
                 data_payload['options_str'] = json.dumps(options)
