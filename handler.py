@@ -122,8 +122,20 @@ def process_document_conversion(job):
             return {"error": "Conteúdo do arquivo decodificado está vazio."}
 
         print(f"Enviando arquivo '{filename}' para conversão com opções: {options}")
+        
+        # Preparar o arquivo para upload
         files_payload = {'upload_file': (filename, file_content_bytes)}
+        
+        # Preparar as opções - tentando diferentes formatos para resolver o erro 422
         data_payload = {}
+        
+        # Tentativa 1: Enviar as opções como parte específica no formulário
+        if 'to_formats' in options:
+            data_payload['to_formats'] = ','.join(options['to_formats'])
+        if 'ocr' in options:
+            data_payload['ocr'] = 'true' if options['ocr'] else 'false'
+            
+        # Tentativa 2: Enviar também um JSON serializado para compatibilidade
         if options:
             try:
                 data_payload['options_str'] = json.dumps(options)
@@ -132,8 +144,24 @@ def process_document_conversion(job):
                 return {"error": f"Erro ao serializar opções para JSON: {e}", "options_fornecidas": options}
 
         try:
-            response = requests.post(CONVERT_ENDPOINT, files=files_payload, data=data_payload, timeout=30)
+            # Adicionar headers explícitos para garantir que o multipart/form-data seja interpretado corretamente
+            headers = {
+                'Accept': 'application/json',
+            }
+            
+            print(f"Enviando request para {CONVERT_ENDPOINT} com data: {data_payload}")
+            response = requests.post(CONVERT_ENDPOINT, 
+                                   files=files_payload, 
+                                   data=data_payload, 
+                                   headers=headers,
+                                   timeout=30)
+            
             print(f" Chamada para CONVERT_ENDPOINT. Status: {response.status_code}, Resposta: {response.text[:200]}...")
+            
+            if response.status_code == 422:
+                print(f" ERRO 422: Resposta completa: {response.text}")
+                return {"error": f"Erro 422 Unprocessable Entity: O servidor não conseguiu processar a requisição. Detalhes: {response.text}"}
+                
             response.raise_for_status()
             convert_data = response.json()
             task_id = convert_data.get('task_id')
