@@ -51,9 +51,6 @@ RUN --mount=from=ghcr.io/astral-sh/uv:0.6.1,source=/uv,target=/bin/uv \
       --no-install-project \
       --no-dev \
       --extra cpu \
-      --extra ui \
-      --extra tesserocr \
-      --extra rapidocr \
       ${UV_SYNC_EXTRA_ARGS}
 
 ARG MODELS_LIST="layout tableformer picture_classifier easyocr"
