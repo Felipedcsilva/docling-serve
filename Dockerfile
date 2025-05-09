@@ -47,10 +47,7 @@ RUN --mount=from=ghcr.io/astral-sh/uv:0.6.1,source=/uv,target=/bin/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     umask 002 && \
-    # Instala dependências com o extra 'cpu' e outros não conflitantes (ui, tesserocr, rapidocr).
-    # Não instala o projeto local aqui (--no-install-project).
     uv sync \
-      --frozen \
       --no-install-project \
       --no-dev \
       --extra cpu \
@@ -75,9 +72,7 @@ RUN --mount=from=ghcr.io/astral-sh/uv:0.6.1,source=/uv,target=/bin/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     umask 002 && \
-    # Instala o projeto local e suas dependências com o extra 'cpu' e outros.
     uv sync \
-      --frozen \
       --no-dev \
       --extra cpu \
       --extra ui \
