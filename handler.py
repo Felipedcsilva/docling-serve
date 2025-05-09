@@ -71,6 +71,7 @@ def start_docling_server():
 
 
 def ensure_docling_server_is_running():
+    global docling_server_process
     print(" Verificando se o servidor docling está rodando...")
     with docling_server_lock:
         if not docling_server_process and not docling_server_started.is_set():
@@ -80,8 +81,7 @@ def ensure_docling_server_is_running():
         elif docling_server_process and docling_server_process.poll() is not None:
             print(f" ERRO: Tentativa de usar docling-serve, mas o subprocesso já terminou com código {docling_server_process.returncode}. Tentando reiniciar...")
             docling_server_started.clear()
-            # Limpar o processo antigo para permitir uma nova tentativa
-            global docling_server_process
+            # A variável já foi declarada global no escopo desta função
             docling_server_process = None 
             server_thread = threading.Thread(target=start_docling_server, daemon=True)
             server_thread.start()
