@@ -42,10 +42,11 @@ ENV \
 
 ARG UV_SYNC_EXTRA_ARGS=""
 
+# Copiar uv.lock e pyproject.toml para o contêiner primeiro
+COPY --chown=1001:0 uv.lock pyproject.toml ./
+
 RUN --mount=from=ghcr.io/astral-sh/uv:0.6.1,source=/uv,target=/bin/uv \
     --mount=type=cache,target=/opt/app-root/src/.cache/uv,uid=1001 \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     umask 002 && \
     uv sync \
       -v \
@@ -65,10 +66,9 @@ RUN echo "Downloading models..." && \
 
 COPY --chown=1001:0 ./docling_serve ./docling_serve
 COPY --chown=1001:0 handler.py .
+
 RUN --mount=from=ghcr.io/astral-sh/uv:0.6.1,source=/uv,target=/bin/uv \
     --mount=type=cache,target=/opt/app-root/src/.cache/uv,uid=1001 \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     umask 002 && \
     uv sync \
       -v \
