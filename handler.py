@@ -129,14 +129,23 @@ def process_document_conversion(job):
         # Preparar as opções
         data_payload = {}
         
-        # Enviar opções conforme documentação da API docling-serve
+        # Tentando enviar opções diretamente como parâmetros de formulário
         if 'to_formats' in options:
             data_payload['to_formats'] = ','.join(options['to_formats'])
         if 'ocr' in options:
             data_payload['ocr'] = str(options['ocr']).lower()  # "true" ou "false" em string
-        
-        # Não incluir options_str que estava causando erro
-        # Vamos simplesmente usar o mecanismo padrão da API
+
+        # Removendo options_str que pode causar conflito
+        # if options:
+        #     try:
+        #         data_payload['options_str'] = json.dumps(options)
+        #         
+        #         print(f"Payload de dados preparado: {data_payload}")
+        #     except TypeError as e:
+        #         print(f"Erro ao serializar opções JSON: {e}")
+        #         return {"error": f"Erro ao serializar opções para JSON: {e}", "options_fornecidas": options}
+
+        print(f"Payload de dados preparado: {data_payload}")
 
         try:
             headers = {
@@ -175,7 +184,7 @@ def process_document_conversion(job):
                 print(f"Poll {i+1}/{max_polls} para {task_id}. Status: {status_response.status_code}, Resposta: {status_response.text[:200]}...")
                 status_response.raise_for_status()
                 status_data = status_response.json()
-                current_status = status_data.get('status', '').upper()
+                current_status = status_data.get('task_status', '').upper()
                 print(f"Poll {i+1}/{max_polls}: Status atual = {current_status}, Detalhes: {status_data}")
                 if current_status == "SUCCESS" or current_status == "COMPLETED":
                     break
