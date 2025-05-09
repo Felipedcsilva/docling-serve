@@ -123,25 +123,20 @@ def process_document_conversion(job):
 
         print(f"Enviando arquivo '{filename}' para conversão com opções: {options}")
         
-        # Preparar o arquivo para upload - usando "files" em vez de "upload_file"
+        # Preparar o arquivo para upload - usando "files" conforme exigido pela API
         files_payload = {'files': (filename, file_content_bytes)}
         
-        # Preparar as opções - tentando diferentes formatos para resolver o erro 422
+        # Preparar as opções
         data_payload = {}
         
-        # Tentativa 1: Enviar as opções como parte específica no formulário
+        # Enviar opções conforme documentação da API docling-serve
         if 'to_formats' in options:
             data_payload['to_formats'] = ','.join(options['to_formats'])
         if 'ocr' in options:
-            data_payload['ocr'] = 'true' if options['ocr'] else 'false'
-            
-        # Tentativa 2: Enviar também um JSON serializado para compatibilidade
-        if options:
-            try:
-                data_payload['options_str'] = json.dumps(options)
-            except TypeError as e:
-                print(f"Erro ao serializar opções JSON: {e}")
-                return {"error": f"Erro ao serializar opções para JSON: {e}", "options_fornecidas": options}
+            data_payload['ocr'] = str(options['ocr']).lower()  # "true" ou "false" em string
+        
+        # Não incluir options_str que estava causando erro
+        # Vamos simplesmente usar o mecanismo padrão da API
 
         try:
             headers = {
