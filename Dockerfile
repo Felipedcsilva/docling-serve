@@ -48,6 +48,7 @@ RUN --mount=from=ghcr.io/astral-sh/uv:0.6.1,source=/uv,target=/bin/uv \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     umask 002 && \
     uv sync \
+      -v \
       --no-install-project \
       --no-dev \
       --extra cpu \
@@ -70,6 +71,7 @@ RUN --mount=from=ghcr.io/astral-sh/uv:0.6.1,source=/uv,target=/bin/uv \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     umask 002 && \
     uv sync \
+      -v \
       --no-dev \
       --extra cpu \
       --extra ui \
